@@ -52,7 +52,6 @@ public class DummyData {
         IdGenerator idGen = instance.getIdGenerator( "newId" );
 //        Map<String, String> macAddr = instance.getMap("macAddr");
 //        Map<String, String> gatewayNames = instance.getMap("gatewayNames");
-        
         while (true){
         dataSet = GenerateData();
         nodeMacAddress = listNodeMacAddress.get(rand.nextInt(100));
