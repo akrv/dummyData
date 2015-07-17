@@ -10,16 +10,22 @@ import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
 import com.hazelcast.core.IdGenerator;
+import com.mongodb.MongoClient;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.bson.Document;
 
 /**
  *
@@ -43,18 +49,20 @@ public class DummyData {
         IMap<String, String> snifferMap = instance.getMap("snifferMap");
         
         // to make mac address common for all nodes.
-        Map<Integer, String> listNodeMacAddress = instance.getMap("listNodeMacAddress");
-        Map<Integer, String> listSnifferMacAddress = instance.getMap("listSnifferMacAddress");
-        if ("master".equals(args[0])){
-        listNodeMacAddress.putAll(GenerateNodeMacAddress(listNodeMacAddress));
-        listSnifferMacAddress.putAll(GenerateNodeMacAddress(listSnifferMacAddress));
+        Map<String, String> listNodeMacAddress = instance.getMap("listNodeMacAddress");
+        Map<String, String> listSnifferMacAddress = instance.getMap("listSnifferMacAddress");
+        if (listNodeMacAddress.isEmpty()){
+        listNodeMacAddress.putAll(GenerateNodeMacAddress());
+        listSnifferMacAddress.putAll(GenerateNodeMacAddress());        
         }
-        IdGenerator idGen = instance.getIdGenerator( "newId" );
+        Integer keySniffer = Integer.parseInt(Collections.max(listSnifferMacAddress.keySet()));
+        Integer keySensor = Integer.parseInt(Collections.max(listNodeMacAddress.keySet()));
 //        Map<String, String> macAddr = instance.getMap("macAddr");
 //        Map<String, String> gatewayNames = instance.getMap("gatewayNames");
         while (true){
+
         dataSet = GenerateData();
-        nodeMacAddress = listNodeMacAddress.get(rand.nextInt(100));
+        nodeMacAddress = listNodeMacAddress.get(""+rand.nextInt(keySensor));
         dataSet[5] = propHostname;
         dataSet[6] = nodeMacAddress;
         str = Arrays.toString(dataSet);
@@ -62,13 +70,14 @@ public class DummyData {
         mapSensors.put(timeStamp, str);
         
         dataSet = GenerateData();
-        snifferMacAddress = listSnifferMacAddress.get(rand.nextInt(100));
+        snifferMacAddress = listSnifferMacAddress.get(""+rand.nextInt(keySniffer));
         dataSet[5] = propHostname;
         dataSet[6] = nodeMacAddress;
         dataSet[7] = snifferMacAddress;
         str = Arrays.toString(dataSet);
         timeStamp = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss.SSS").format(new java.util.Date());
         snifferMap.put(timeStamp, str);
+
         try {
             Thread.sleep(10000);
         }
@@ -105,15 +114,20 @@ public class DummyData {
         return host;
     }    
 
-
-    private static Map GenerateNodeMacAddress(Map macAddrList){
-        for (int i=0;i<100;i++){
-            String macAddr = randomMACAddress();
-            macAddrList.put(i,macAddr);  
-        }
-        return macAddrList;
+//    not used here, MacAddr4Mongo generates this all
+//    read from mongoDB
+    private static Map GenerateNodeMacAddress(){
+        MongoClient mongoClient = new MongoClient( "localhost" , 27017 );
+        MongoDatabase db = mongoClient.getDatabase("translator-dev");
+        MongoCollection<Document> collection = db.getCollection("macAddrs");
+        FindIterable<Document> iterable = collection.find();
+        Document document = iterable.first();
+        document.remove("_id");
+        Map<String, String> documentMap = (Map) document;
+        return documentMap;
     }
     
+    // not used here
     private static String randomMACAddress(){
         Random rand = new Random();
         byte[] macAddr = new byte[6];
