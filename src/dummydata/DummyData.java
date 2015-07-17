@@ -66,9 +66,9 @@ public class DummyData {
         dataSet[5] = propHostname;
         dataSet[6] = nodeMacAddress;
         str = Arrays.toString(dataSet);
-        timeStamp = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new java.util.Date());
+        timeStamp = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss.SSS").format(new java.util.Date());
         mapSensors.put(timeStamp, str);
-        System.out.println("sensor: "+str);
+        System.out.println("sensor: "+timeStamp+str);
         dataSet = GenerateData();
         snifferMacAddress = listSnifferMacAddress.get(""+rand.nextInt(keySniffer));
         dataSet[5] = propHostname;
@@ -76,8 +76,8 @@ public class DummyData {
         dataSet[7] = snifferMacAddress;
         str = Arrays.toString(dataSet);
         timeStamp = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss.SSS").format(new java.util.Date());
-        System.out.println("sniffer: " +str);
-        System.out.println(str);
+        System.out.println("sniffer: "+timeStamp+str);
+        
         try {
             Thread.sleep(10000);
         }
