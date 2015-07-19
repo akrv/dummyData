@@ -4,6 +4,7 @@
  * and open the template in the editor.
  */
 
+package com.phynetlab;
 
 import com.hazelcast.config.Config;
 import com.hazelcast.core.Hazelcast;
