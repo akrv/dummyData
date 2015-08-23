@@ -116,8 +116,8 @@ public class DummyData {
 //    not used here, MacAddr4Mongo generates this all
 //    read from mongoDB
     private static Map GenerateNodeMacAddress(){
-        MongoClient mongoClient = new MongoClient( "localhost" , 27017 );
-        MongoDatabase db = mongoClient.getDatabase("translator-dev");
+        MongoClient mongoClient = new MongoClient( "129.217.152.20" , 27017 );
+        MongoDatabase db = mongoClient.getDatabase("autophy-dev");
         MongoCollection<Document> collection = db.getCollection("macAddrs");
         FindIterable<Document> iterable = collection.find();
         Document document = iterable.first();
